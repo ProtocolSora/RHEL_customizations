@@ -1,0 +1,24 @@
+# files/bashrc_extras
+GREEN='\[\e[0;32m\]'
+BLUE='\[\e[0;34m\]'
+YELLOW='\[\e[1;33m\]'
+RED='\[\e[0;31m\]'
+NC='\[\e[0m\]'
+
+update_oc_project_cache() {
+    local kubeconfig_path="${KUBECONFIG:-$HOME/.kube/config}"
+    if [[ ! -f "$kubeconfig_path" ]]; then
+        unset _LAST_OC_PROJECT
+        return 0
+    fi
+    local project
+    project=$(oc config view --minify --output='jsonpath={..namespace}' 2>/dev/null)
+    if [[ -n "$project" ]]; then
+        _LAST_OC_PROJECT="$project"
+    else
+        unset _LAST_OC_PROJECT
+    fi
+}
+
+PROMPT_COMMAND="update_oc_project_cache; ${PROMPT_COMMAND:-}"
+export PS1="${GREEN}\u${NC}@${BLUE}\h${NC}:${YELLOW}\W${NC}\$( [[ -n \"\$_LAST_OC_PROJECT\" ]] && echo \"(${RED}\$_LAST_OC_PROJECT${NC})\" ) \n$ "
