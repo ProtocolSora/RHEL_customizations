@@ -1,0 +1,40 @@
+---
+- name: Configure RHEL workspace
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks: 
+    - name: Ensure git is installed
+    become: yes
+    ansible.builtin.dnf: 
+      name:
+        - git
+      state: present
+
+    - name: Inject custom OpenShift prompt into .bashrc
+    ansible.builtin.blockinfile:
+      path: "{{ lookup('env', 'HOME') }}/.bashrc"
+      create: yes
+      marker: "# {mark} ANSIBLE MANAGED BLOCK - OC PROMPT"
+      block: "{{ lookup('file', 'files/bashrc_extras') }}"
+
+    - name: Deploy .vimrc
+      ansible.builtin.copy:
+        src: files/vimrc
+        dest: "{{ lookup('env', 'HOME') }}/.vimrc"
+        mode: '0644'
+
+- name: Ensure native Vim plugin directory exists
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'HOME') }}/.vim/pack/plugins/start"
+        state: directory
+        mode: '0755'
+
+- name: Install Vim plugins via Git
+      ansible.builtin.git:
+        repo: "{{ item }}"
+        dest: "{{ lookup('env', 'HOME') }}/.vim/pack/plugins/start/{{ item | basename | regex_replace('\\.git$', '') }}"
+        depth: 1
+      loop:
+        - https://github.com/Yggdroot/indentLine.git
