@@ -5,6 +5,11 @@ YELLOW='\[\e[1;33m\]'
 RED='\[\e[0;31m\]'
 NC='\[\e[0m\]'
 
+export HISTTIMEFORMAT=$'\e[36m%F \e[34m%T \e[0m '
+
+alias ocld="oc login -u developer -p developer https://api.ocp4.example.com:6443"
+alias ocla="oc login -u admin -p redhatocp https://api.ocp4.example.com:6443"
+
 update_oc_project_cache() {
     local kubeconfig_path="${KUBECONFIG:-$HOME/.kube/config}"
     if [[ ! -f "$kubeconfig_path" ]]; then
@@ -20,5 +25,5 @@ update_oc_project_cache() {
     fi
 }
 
-PROMPT_COMMAND="update_oc_project_cache; ${PROMPT_COMMAND:-}"
+PROMPT_COMMAND="update_oc_project_cache; history -a; history -n; ${PROMPT_COMMAND:-}"
 export PS1="${GREEN}\u${NC}@${BLUE}\h${NC}:${YELLOW}\W${NC}\$( [[ -n \"\$_LAST_OC_PROJECT\" ]] && echo \"(${RED}\$_LAST_OC_PROJECT${NC})\" ) \n$ "
