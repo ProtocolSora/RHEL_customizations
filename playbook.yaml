@@ -1,7 +1,6 @@
 ---
 - name: Configure RHEL workspace
   hosts: localhost
-  connection: local
   gather_facts: no
 
   tasks: 
